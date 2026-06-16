@@ -31,6 +31,24 @@ public class GlobalExceptionHandler {
             .body(ApiResponse.error("VALIDATION_ERROR", "Validation failed", errors));
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidation(ValidationException ex) {
+        return ResponseEntity.badRequest()
+            .body(ApiResponse.error("VALIDATION_ERROR", ex.getMessage(), ex.getDetails()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.error("CONFLICT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest()
+            .body(ApiResponse.error("VALIDATION_ERROR", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

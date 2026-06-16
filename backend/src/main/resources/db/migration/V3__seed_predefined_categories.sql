@@ -1,0 +1,16 @@
+INSERT INTO category (id, name, is_predefined, sort_order) VALUES
+    (gen_random_uuid(), 'Food & Dining',     TRUE, 1),
+    (gen_random_uuid(), 'Groceries',         TRUE, 2),
+    (gen_random_uuid(), 'Housing',           TRUE, 3),
+    (gen_random_uuid(), 'Utilities',         TRUE, 4),
+    (gen_random_uuid(), 'Transportation',    TRUE, 5),
+    (gen_random_uuid(), 'Entertainment',     TRUE, 6),
+    (gen_random_uuid(), 'Shopping',          TRUE, 7),
+    (gen_random_uuid(), 'Health & Medical',  TRUE, 8),
+    (gen_random_uuid(), 'Insurance',         TRUE, 9),
+    (gen_random_uuid(), 'Education',         TRUE, 10),
+    (gen_random_uuid(), 'Travel',            TRUE, 11),
+    (gen_random_uuid(), 'Subscriptions',     TRUE, 12),
+    (gen_random_uuid(), 'Personal Care',     TRUE, 13),
+    (gen_random_uuid(), 'Gifts & Donations', TRUE, 14),
+    (gen_random_uuid(), 'Other',             TRUE, 15);
