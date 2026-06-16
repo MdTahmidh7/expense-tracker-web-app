@@ -2,6 +2,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService, ApiResponse, PagedResponse } from './api.service';
 
+export interface BudgetAlert {
+  categoryId: string;
+  categoryName: string;
+  budget: number;
+  spent: number;
+  percentUsed: number;
+  level: string;
+}
+
 export interface ExpenseDTO {
   id: string;
   amount: number;
@@ -20,6 +29,11 @@ export interface ExpenseDTO {
   updatedAt: string;
 }
 
+export interface ExpenseCreateResponse {
+  expense: ExpenseDTO;
+  budgetAlerts: BudgetAlert[] | null;
+}
+
 export interface ExpenseCreateRequest {
   amount: number;
   description: string;
@@ -29,6 +43,7 @@ export interface ExpenseCreateRequest {
   paymentMethod?: string;
   tags?: string[];
   notes?: string | null;
+  receiptImagePath?: string;
 }
 
 export interface ExpenseFilters {
@@ -55,12 +70,12 @@ export class ExpenseService {
     return this.api.get<ExpenseDTO>(`/expenses/${id}`);
   }
 
-  create(req: ExpenseCreateRequest): Observable<ApiResponse<ExpenseDTO>> {
-    return this.api.post<ExpenseDTO>('/expenses', req);
+  create(req: ExpenseCreateRequest): Observable<ApiResponse<ExpenseCreateResponse>> {
+    return this.api.post<ExpenseCreateResponse>('/expenses', req);
   }
 
-  update(id: string, req: ExpenseCreateRequest): Observable<ApiResponse<ExpenseDTO>> {
-    return this.api.put<ExpenseDTO>(`/expenses/${id}`, req);
+  update(id: string, req: ExpenseCreateRequest): Observable<ApiResponse<ExpenseCreateResponse>> {
+    return this.api.put<ExpenseCreateResponse>(`/expenses/${id}`, req);
   }
 
   delete(id: string): Observable<ApiResponse<void>> {

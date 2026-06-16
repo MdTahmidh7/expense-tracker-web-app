@@ -25,7 +25,7 @@ public record ExpenseCreateRequest(
 
     @Size(max = 2000) String notes,
 
-    UUID receiptImageId
+    String receiptImagePath
 ) {
     public ExpenseCreateRequest {
         if (paymentMethod == null) paymentMethod = "Cash";

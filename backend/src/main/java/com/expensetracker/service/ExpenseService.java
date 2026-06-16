@@ -1,7 +1,9 @@
 package com.expensetracker.service;
 
 import com.expensetracker.dto.request.ExpenseCreateRequest;
+import com.expensetracker.dto.response.ExpenseCreateResponse;
 import com.expensetracker.dto.response.ExpenseDTO;
+import com.expensetracker.dto.response.PagedResponse;
 import com.expensetracker.entity.Category;
 import com.expensetracker.entity.Expense;
 import com.expensetracker.entity.User;
@@ -9,6 +11,7 @@ import com.expensetracker.exception.ResourceNotFoundException;
 import com.expensetracker.mapper.ExpenseMapper;
 import com.expensetracker.repository.CategoryRepository;
 import com.expensetracker.repository.ExpenseRepository;
+import com.expensetracker.service.BudgetService.BudgetAlert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,6 +28,8 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final StorageService storageService;
+    private final BudgetService budgetService;
 
     public Page<ExpenseDTO> findAll(UUID userId, String search, UUID categoryId,
                                     String paymentMethod, LocalDate startDate, LocalDate endDate,
@@ -39,7 +45,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    public ExpenseDTO create(UUID userId, ExpenseCreateRequest req) {
+    public ExpenseCreateResponse create(UUID userId, ExpenseCreateRequest req) {
         var user = new User();
         user.setId(userId);
         var category = categoryRepository.findByIdAndUserId(req.categoryId(), userId)
@@ -53,13 +59,16 @@ public class ExpenseService {
             .date(req.date()).time(req.time())
             .paymentMethod(req.paymentMethod())
             .tags(ExpenseMapper.tagsToString(req.tags()))
+            .receiptImagePath(req.receiptImagePath())
             .build();
         expense = expenseRepository.save(expense);
-        return ExpenseMapper.toDto(expense);
+
+        var alerts = budgetService.recalculate(userId, req.date());
+        return new ExpenseCreateResponse(ExpenseMapper.toDto(expense), alerts);
     }
 
     @Transactional
-    public ExpenseDTO update(UUID userId, UUID expenseId, ExpenseCreateRequest req) {
+    public ExpenseCreateResponse update(UUID userId, UUID expenseId, ExpenseCreateRequest req) {
         var expense = expenseRepository.findByIdAndUserId(expenseId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
 
@@ -75,15 +84,21 @@ public class ExpenseService {
         if (req.paymentMethod() != null) expense.setPaymentMethod(req.paymentMethod());
         if (req.tags() != null) expense.setTags(ExpenseMapper.tagsToString(req.tags()));
         if (req.notes() != null) expense.setNotes(req.notes());
+        if (req.receiptImagePath() != null) expense.setReceiptImagePath(req.receiptImagePath());
 
         expense = expenseRepository.save(expense);
-        return ExpenseMapper.toDto(expense);
+
+        var alerts = budgetService.recalculate(userId, req.date() != null ? req.date() : expense.getDate());
+        return new ExpenseCreateResponse(ExpenseMapper.toDto(expense), alerts);
     }
 
     @Transactional
     public void delete(UUID userId, UUID expenseId) {
         var expense = expenseRepository.findByIdAndUserId(expenseId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
+        if (expense.getReceiptImagePath() != null) {
+            storageService.delete(expense.getReceiptImagePath());
+        }
         expenseRepository.delete(expense);
     }
 }

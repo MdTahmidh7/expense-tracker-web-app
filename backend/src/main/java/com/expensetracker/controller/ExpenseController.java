@@ -2,6 +2,7 @@ package com.expensetracker.controller;
 
 import com.expensetracker.dto.request.ExpenseCreateRequest;
 import com.expensetracker.dto.response.ApiResponse;
+import com.expensetracker.dto.response.ExpenseCreateResponse;
 import com.expensetracker.dto.response.ExpenseDTO;
 import com.expensetracker.dto.response.PagedResponse;
 import com.expensetracker.service.AuthService;
@@ -52,7 +53,7 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ExpenseDTO>> create(
+    public ResponseEntity<ApiResponse<ExpenseCreateResponse>> create(
             @AuthenticationPrincipal OAuth2User principal,
             @Valid @RequestBody ExpenseCreateRequest req) {
         var userId = authService.getUserId(principal);
@@ -61,7 +62,7 @@ public class ExpenseController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ExpenseDTO> update(
+    public ApiResponse<ExpenseCreateResponse> update(
             @AuthenticationPrincipal OAuth2User principal,
             @PathVariable UUID id,
             @Valid @RequestBody ExpenseCreateRequest req) {

@@ -40,7 +40,7 @@ public class ExpenseMapper {
             expense.getPaymentMethod(),
             stringToTags(expense.getTags()),
             expense.getReceiptImagePath() != null
-                ? "/api/receipts/" + expense.getId() + "/image" : null,
+                ? "/api/receipts/image?path=" + expense.getReceiptImagePath() : null,
             expense.getIsRecurring(),
             expense.getRecurringTemplateId(),
             expense.getCreatedAt(),
