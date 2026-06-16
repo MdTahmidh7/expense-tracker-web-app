@@ -1,0 +1,27 @@
+### Java / Maven ###
+backend/target/
+backend/*.jar
+backend/*.war
+backend/.mvn/wrapper/maven-wrapper.jar
+
+### IDE ###
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+### Node / Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+### Environment ###
+.env
+*.log
+
+### OS ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
