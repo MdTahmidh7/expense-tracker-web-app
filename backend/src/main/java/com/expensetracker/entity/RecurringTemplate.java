@@ -29,7 +29,7 @@ public class RecurringTemplate {
     @Column(nullable = false, length = 500)
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 2000)
     private String notes;
 
     @Column(nullable = false)

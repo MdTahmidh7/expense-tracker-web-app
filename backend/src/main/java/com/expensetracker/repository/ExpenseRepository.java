@@ -19,14 +19,21 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
 
     Optional<Expense> findByIdAndUserId(UUID id, UUID userId);
 
-    @Query("SELECT e FROM Expense e WHERE e.user.id = :userId AND " +
-           "(:search IS NULL OR LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(COALESCE(e.notes, '')) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:categoryId IS NULL OR e.category.id = :categoryId) " +
-           "AND (:paymentMethod IS NULL OR e.paymentMethod = :paymentMethod) " +
-           "AND (:startDate IS NULL OR e.date >= :startDate) " +
-           "AND (:endDate IS NULL OR e.date <= :endDate) " +
-           "ORDER BY e.date DESC, e.createdAt DESC")
+    @Query("""
+SELECT e
+FROM Expense e
+WHERE e.user.id = :userId
+AND (
+    :search IS NULL
+    OR LOWER(e.description) LIKE CONCAT('%', CAST(:search AS string), '%')
+    OR LOWER(COALESCE(e.notes, '')) LIKE CONCAT('%', CAST(:search AS string), '%')
+)
+AND (:categoryId IS NULL OR e.category.id = :categoryId)
+AND (:paymentMethod IS NULL OR e.paymentMethod = :paymentMethod)
+AND (:startDate IS NULL OR e.date >= :startDate)
+AND (:endDate IS NULL OR e.date <= :endDate)
+ORDER BY e.date DESC, e.createdAt DESC
+""")
     Page<Expense> searchExpenses(
         @Param("userId") UUID userId,
         @Param("search") String search,

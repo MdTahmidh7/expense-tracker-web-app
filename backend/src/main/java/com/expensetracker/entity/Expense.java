@@ -2,6 +2,8 @@ package com.expensetracker.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.UUID;
@@ -32,7 +34,7 @@ public class Expense {
     @Column(nullable = false, length = 500)
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 2000)
     private String notes;
 
     @Column(nullable = false)
@@ -43,8 +45,9 @@ public class Expense {
     @Column(nullable = false)
     private String paymentMethod;
 
-    @Column(columnDefinition = "TEXT[]")
-    private String tags;
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(columnDefinition = "TEXT[]", nullable = false)
+    private String[] tags;
 
     private String receiptImagePath;
 
@@ -69,7 +72,7 @@ public class Expense {
         updatedAt = Instant.now();
         if (currency == null) currency = "BDT";
         if (paymentMethod == null) paymentMethod = "Cash";
-        if (tags == null) tags = "{}";
+        if (tags == null) tags = new String[0];
         if (isRecurring == null) isRecurring = false;
         if (version == null) version = 0;
     }

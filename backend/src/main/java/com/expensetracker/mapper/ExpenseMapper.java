@@ -8,17 +8,14 @@ import java.util.List;
 
 public class ExpenseMapper {
 
-    private static final String TAGS_DELIMITER = ",";
-
-    public static String tagsToString(List<String> tags) {
-        if (tags == null || tags.isEmpty()) return "{}";
-        return "{" + String.join(TAGS_DELIMITER, tags) + "}";
+    public static String[] tagsToString(List<String> tags) {
+        if (tags == null) return new String[0];
+        return tags.toArray(new String[0]);
     }
 
-    public static List<String> stringToTags(String tags) {
-        if (tags == null || tags.equals("{}") || tags.isBlank()) return List.of();
-        String clean = tags.replaceAll("[{}]", "");
-        return Arrays.stream(clean.split(TAGS_DELIMITER))
+    public static List<String> stringToTags(String[] tags) {
+        if (tags == null || tags.length == 0) return List.of();
+        return Arrays.stream(tags)
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .toList();

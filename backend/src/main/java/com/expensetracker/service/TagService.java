@@ -1,7 +1,6 @@
 package com.expensetracker.service;
 
 import com.expensetracker.exception.ValidationException;
-import com.expensetracker.mapper.ExpenseMapper;
 import com.expensetracker.repository.ExpenseRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -9,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ public class TagService {
     public List<String> getAllTags(UUID userId) {
         var tags = expenseRepository.findAllTagsByUserId(userId);
         return tags.stream()
-            .flatMap(t -> ExpenseMapper.stringToTags(t[0]).stream())
+            .flatMap(Arrays::stream)
             .distinct()
             .sorted()
             .toList();

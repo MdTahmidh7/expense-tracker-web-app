@@ -42,7 +42,7 @@ public class RecurringService {
                 .notes(t.getNotes())
                 .date(now.withDayOfMonth(Math.min(t.getDayOfMonth(), now.lengthOfMonth())))
                 .paymentMethod(t.getPaymentMethod())
-                .tags("{}")
+                .tags(new String[0])
                 .isRecurring(true)
                 .recurringTemplateId(t.getId())
                 .build();

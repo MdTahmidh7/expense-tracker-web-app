@@ -14,6 +14,8 @@ import com.expensetracker.repository.ExpenseRepository;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.BudgetService.BudgetAlert;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.internal.util.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExpenseService {
@@ -36,6 +39,16 @@ public class ExpenseService {
     public Page<ExpenseDTO> findAll(UUID userId, String search, UUID categoryId,
                                     String paymentMethod, LocalDate startDate, LocalDate endDate,
                                     Pageable pageable) {
+
+        String normalizedSearch =
+                StringUtils.hasText(search)
+                        ? search.trim().toLowerCase()
+                        : null;
+        log.info("search = {}", search);
+        log.info("search class = {}", search == null ? null : search.getClass());
+
+        search = (search == null || search.isBlank()) ? null : search.toLowerCase();
+
         return expenseRepository.searchExpenses(userId, search, categoryId, paymentMethod, startDate, endDate, pageable)
             .map(ExpenseMapper::toDto);
     }

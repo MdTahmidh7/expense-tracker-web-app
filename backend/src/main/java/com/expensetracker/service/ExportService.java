@@ -39,7 +39,7 @@ public class ExportService {
                     expense.getAmount(),
                     expense.getCurrency(),
                     expense.getPaymentMethod(),
-                    expense.getTags(),
+                    String.join(",", expense.getTags()),
                     expense.getNotes(),
                     expense.getReceiptImagePath()
                 );
