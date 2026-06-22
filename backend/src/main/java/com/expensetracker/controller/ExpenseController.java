@@ -40,7 +40,15 @@ public class ExpenseController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         var userId = authService.getUserId(principal);
-        var page = expenseService.findAll(userId, search, categoryId, paymentMethod, startDate, endDate, pageable);
+        var page = expenseService.findAll(
+                userId,
+                search,
+                categoryId,
+                paymentMethod,
+                startDate,
+                endDate,
+                pageable
+        );
         return ApiResponse.success(PagedResponse.from(page));
     }
 

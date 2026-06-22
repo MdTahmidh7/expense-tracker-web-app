@@ -36,45 +36,55 @@ public class ExpenseService {
     private final StorageService storageService;
     private final BudgetService budgetService;
 
-    public Page<ExpenseDTO> findAll(UUID userId, String search, UUID categoryId,
-                                    String paymentMethod, LocalDate startDate, LocalDate endDate,
-                                    Pageable pageable) {
+    public Page<ExpenseDTO> findAll(
+            UUID userId,
+            String search,
+            UUID categoryId,
+            String paymentMethod,
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable
+    ) {
 
-        String normalizedSearch =
-                StringUtils.hasText(search)
-                        ? search.trim().toLowerCase()
-                        : null;
         log.info("search = {}", search);
         log.info("search class = {}", search == null ? null : search.getClass());
-
         search = (search == null || search.isBlank()) ? null : search.toLowerCase();
 
-        return expenseRepository.searchExpenses(userId, search, categoryId, paymentMethod, startDate, endDate, pageable)
-            .map(ExpenseMapper::toDto);
+        return expenseRepository.searchExpenses(
+                userId,
+                search,
+                categoryId,
+                paymentMethod,
+                startDate,
+                endDate,
+                pageable
+        ).map(ExpenseMapper::toDto);
     }
 
     public ExpenseDTO findById(UUID userId, UUID expenseId) {
-        var expense = expenseRepository.findByIdAndUserId(expenseId, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
+        var expense = expenseRepository
+                .findByIdAndUserId(expenseId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
         return ExpenseMapper.toDto(expense);
     }
 
     @Transactional
     public ExpenseCreateResponse create(UUID userId, ExpenseCreateRequest req) {
         var user = userRepository.getReferenceById(userId);
-        var category = categoryRepository.findByIdAndUserId(req.categoryId(), userId)
-            .orElseThrow(() -> new ResourceNotFoundException("Category", "id", req.categoryId()));
+        var category = categoryRepository
+                .findByIdAndUserId(req.categoryId(), userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", req.categoryId()));
 
         var expense = Expense.builder()
-            .user(user).category(category)
-            .amount(req.amount()).currency("BDT")
-            .description(req.description().trim())
-            .notes(req.notes())
-            .date(req.date()).time(req.time())
-            .paymentMethod(req.paymentMethod())
-            .tags(ExpenseMapper.tagsToString(req.tags()))
-            .receiptImagePath(req.receiptImagePath())
-            .build();
+                .user(user).category(category)
+                .amount(req.amount()).currency("BDT")
+                .description(req.description().trim())
+                .notes(req.notes())
+                .date(req.date()).time(req.time())
+                .paymentMethod(req.paymentMethod())
+                .tags(ExpenseMapper.tagsToString(req.tags()))
+                .receiptImagePath(req.receiptImagePath())
+                .build();
         expense = expenseRepository.save(expense);
 
         var alerts = budgetService.recalculate(userId, req.date());
@@ -83,16 +93,18 @@ public class ExpenseService {
 
     @Transactional
     public ExpenseCreateResponse update(UUID userId, UUID expenseId, ExpenseCreateRequest req) {
-        var expense = expenseRepository.findByIdAndUserId(expenseId, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
+        var expense = expenseRepository
+                .findByIdAndUserId(expenseId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
 
         if (req.amount() != null) expense.setAmount(req.amount());
         if (req.description() != null) expense.setDescription(req.description().trim());
         if (req.date() != null) expense.setDate(req.date());
         expense.setTime(req.time());
         if (req.categoryId() != null) {
-            var category = categoryRepository.findByIdAndUserId(req.categoryId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", req.categoryId()));
+            var category = categoryRepository.
+                    findByIdAndUserId(req.categoryId(), userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", req.categoryId()));
             expense.setCategory(category);
         }
         if (req.paymentMethod() != null) expense.setPaymentMethod(req.paymentMethod());
@@ -108,8 +120,9 @@ public class ExpenseService {
 
     @Transactional
     public void delete(UUID userId, UUID expenseId) {
-        var expense = expenseRepository.findByIdAndUserId(expenseId, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
+        var expense = expenseRepository
+                .findByIdAndUserId(expenseId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", expenseId));
         if (expense.getReceiptImagePath() != null) {
             storageService.delete(expense.getReceiptImagePath());
         }
