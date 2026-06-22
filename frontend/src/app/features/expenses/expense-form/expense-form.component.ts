@@ -66,20 +66,15 @@ import { map, Observable, startWith } from 'rxjs';
               </mat-form-field>
             </div>
 
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
+            <div class="form-row full-width">
+              <mat-form-field appearance="outline">
                 <mat-label>Category</mat-label>
-                <input matInput [matAutocomplete]="auto" formControlName="categoryId"
-                       (input)="onCategoryInput($any($event.target).value)"
-                       [matChipInputFor]="chipGrid">
-                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onCategorySelected($event)">
-                  <mat-option *ngFor="let cat of filteredCategories | async" [value]="cat.id">
+                <mat-select formControlName="categoryId">
+                  <mat-option [value]="''">Select a category</mat-option>
+                  <mat-option *ngFor="let cat of categories" [value]="cat.id">
                     {{ cat.name }}
                   </mat-option>
-                  <mat-option *ngIf="showCreateOption()" [value]="newCategoryName">
-                    + Create "{{ newCategoryName }}"
-                  </mat-option>
-                </mat-autocomplete>
+                </mat-select>
                 <mat-error *ngIf="expenseForm.get('categoryId')?.hasError('required')">Category is required</mat-error>
               </mat-form-field>
             </div>
@@ -164,8 +159,6 @@ export class ExpenseFormComponent implements OnInit {
   categories: CategoryDTO[] = [];
   tags: string[] = [];
   allTags: string[] = [];
-  newCategoryName = '';
-  showCreateOption = () => false;
   separatorKeysCodes = [ENTER, COMMA];
 
   expenseForm = this.fb.group({
@@ -179,16 +172,9 @@ export class ExpenseFormComponent implements OnInit {
     notes: ['', Validators.maxLength(2000)],
   });
 
-  filteredCategories: Observable<CategoryDTO[]>;
   filteredTags: Observable<string[]>;
 
   constructor() {
-    const categoryControl = this.expenseForm.get('categoryId') as FormControl;
-    this.filteredCategories = categoryControl.valueChanges.pipe(
-      startWith(''),
-      map(val => this._filterCategories(val))
-    );
-
     const tagInput = new FormControl('');
     this.filteredTags = tagInput.valueChanges.pipe(
       startWith(''),
@@ -272,32 +258,6 @@ export class ExpenseFormComponent implements OnInit {
     input.value = '';
   }
 
-  onCategoryInput(value: string): void {
-    if (!value) { this.showCreateOption = () => false; return; }
-    const existing = this.categories.find(
-      c => c.name.toLowerCase() === value.toLowerCase()
-    );
-    this.newCategoryName = value;
-    this.showCreateOption = () => !existing && value.length > 0;
-  }
-
-  onCategorySelected(event: MatAutocompleteSelectedEvent): void {
-    const value = event.option.value;
-    const existing = this.categories.find(c => c.id === value);
-    if (existing) {
-      this.expenseForm.patchValue({ categoryId: existing.id });
-      this.showCreateOption = () => false;
-      return;
-    }
-    this.categoryService.create(value).subscribe(res => {
-      if (res.success) {
-        this.categories = [...this.categories, res.data];
-        this.expenseForm.patchValue({ categoryId: res.data.id });
-        this.showCreateOption = () => false;
-      }
-    });
-  }
-
   addTag(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     if (value && !this.tags.includes(value)) {
@@ -315,11 +275,6 @@ export class ExpenseFormComponent implements OnInit {
     if (!this.tags.includes(value)) {
       this.tags = [...this.tags, value];
     }
-  }
-
-  private _filterCategories(value: any): CategoryDTO[] {
-    const filterValue = (typeof value === 'string' ? value : '').toLowerCase();
-    return this.categories.filter(c => c.name.toLowerCase().includes(filterValue));
   }
 
   private _filterTags(value: any): string[] {

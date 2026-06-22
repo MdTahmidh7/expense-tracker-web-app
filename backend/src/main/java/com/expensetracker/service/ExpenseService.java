@@ -11,6 +11,7 @@ import com.expensetracker.exception.ResourceNotFoundException;
 import com.expensetracker.mapper.ExpenseMapper;
 import com.expensetracker.repository.CategoryRepository;
 import com.expensetracker.repository.ExpenseRepository;
+import com.expensetracker.repository.UserRepository;
 import com.expensetracker.service.BudgetService.BudgetAlert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
     private final StorageService storageService;
     private final BudgetService budgetService;
 
@@ -46,8 +48,7 @@ public class ExpenseService {
 
     @Transactional
     public ExpenseCreateResponse create(UUID userId, ExpenseCreateRequest req) {
-        var user = new User();
-        user.setId(userId);
+        var user = userRepository.getReferenceById(userId);
         var category = categoryRepository.findByIdAndUserId(req.categoryId(), userId)
             .orElseThrow(() -> new ResourceNotFoundException("Category", "id", req.categoryId()));
 

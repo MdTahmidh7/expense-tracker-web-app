@@ -18,12 +18,13 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("/api/auth/callback", true)
+                .defaultSuccessUrl("http://localhost:4200/auth/callback", true)
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("http://localhost:4200/login")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
             )
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(request -> {
